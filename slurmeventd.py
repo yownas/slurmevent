@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import re
 import select
 import socket
 import socketserver
@@ -30,8 +31,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
   def handle(self):
     print("Server handle.")
     while self.running:
-      #r,w,e = select.select([self.request],[],[],0.01)
-      r,w,e = select.select([self.request],[],[],0.5)
+      r,w,e = select.select([self.request],[],[],0.01)
 
       for rs in r:
         if rs == self.request:
@@ -49,7 +49,8 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
         try:
           self.msgid = messageid
           #self.request.sendall(bytes(message, 'utf-8'))
-          self.request.sendall(message)
+          self.request.sendall(bytes("%d %s" % (self.msgid, message), 'ascii'))
+          #self.request.sendall(message)
         except BrokenPipeError as e:
           print(e)
           self.running = False
@@ -68,11 +69,33 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 def read_log():
   global message, messageid
+
+  #FIXME wait until all clients has got the last msg
+
   if tail.poll(1):
-    log = logfile.stdout.readline()
-    print(log)
-    message = log
-    messageid += 1
+    log = str(logfile.stdout.readline())
+    state = ""
+
+    m = re.match(".* _slurm_rpc_submit_batch_job: JobId=([0-9]*) .*", log)
+    if m is not None:
+      jobid = m.groups()[0]
+      state = "pending"
+
+    m = re.match(".* prolog_running_decr: Configuration for JobId=([0-9]*) is complete", log)
+    if m is not None:
+      jobid = m.groups()[0]
+      state = "running"
+
+    m = re.match(".* _job_complete: JobId=([0-9]*) done", log)
+    if m is not None:
+      jobid = m.groups()[0]
+      state = "complete"
+
+    if state != "":
+      #message = log
+      message = "%s %s" % (jobid, state)
+      messageid += 1
+      print("%d %s" % (messageid, message))
   pass
 
 
