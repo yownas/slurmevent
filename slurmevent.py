@@ -53,7 +53,8 @@ while waiting:
       print(received)
     # Check it match and exit
     if waitfor in received:
-      print(received)
+      if not opts.verbose:
+        print(received)
       waiting = False
 
 sock.close()
