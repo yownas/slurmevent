@@ -115,7 +115,7 @@ if __name__ == "__main__":
     op = optparse.OptionParser(usage="usage: %prog [-h] [-v]")
     op.add_option("-v", "--verbose",
                   action="store_true", default=False,
-                  help="don't show incomming data")
+                  help="show log data")
     op.add_option("-l", "--logfile",
                   action="store", type="string", default="/var/log/slurm/slurmctld.log",
                   help="Path to the slurmctld logfile")
