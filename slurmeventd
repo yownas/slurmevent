@@ -13,7 +13,7 @@ RECV_BUFFER = 4096
 
 def chat_server():
     # Open logfile tail
-    logfile = subprocess.Popen(['tail', '-n0', '-F', 'my.log'],
+    logfile = subprocess.Popen(['tail', '-n0', '-F', opts.logfile],
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     tail = select.poll()
     tail.register(logfile.stdout) 
@@ -50,9 +50,8 @@ def chat_server():
                     # receiving data from the socket.
                     data = sock.recv(RECV_BUFFER)
                     if data:
-                        ## there is something in the socket
-                        #broadcast(server_socket, sock, "\r" + '[' + str(sock.getpeername()) + '] ' + data)  
-                        print('[' + str(sock.getpeername()) + '] ' + data)  
+                        ## there is something in the socket (should not happen)
+                        print('Warning: Client [' + str(sock.getpeername()) + '] sent: ' + data)  
                     else:
                         # remove the socket that's broken    
                         if sock in SOCKET_LIST:
@@ -68,7 +67,6 @@ def chat_server():
 
         # Check if there is new logdata
         if tail.poll(0.1):
-            #log = str(logfile.stdout.readline()).strip()
             log = logfile.stdout.readline().decode('utf-8')
             state = ""
 
@@ -92,7 +90,8 @@ def chat_server():
 
             if state != "":
                 message = "[%s] %s %s" % (time, jobid, state)
-                print("%s" % (message))
+                if opts.verbose:
+                    print("%s" % (message))
                 broadcast(server_socket, message)
 
     server_socket.close()
@@ -113,10 +112,13 @@ def broadcast (server_socket, message):
  
 if __name__ == "__main__":
 
-    op = optparse.OptionParser(usage="usage: %prog [-h] [-v] [-p|-r|-c jobid]")
+    op = optparse.OptionParser(usage="usage: %prog [-h] [-v]")
     op.add_option("-v", "--verbose",
                   action="store_true", default=False,
                   help="don't show incomming data")
+    op.add_option("-l", "--logfile",
+                  action="store", type="string", default="/var/log/slurm/slurmctld.log",
+                  help="Path to the slurmctld logfile")
     op.add_option("-H", "--host",
                   action="store", type="string", default="localhost", metavar="hostname",
                   help="hostname to bind to (Default: localhost)")
