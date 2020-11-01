@@ -1,3 +1,4 @@
+import optparse
 import socket
 import sys
 
@@ -5,6 +6,28 @@ HOST, PORT = "localhost", 50007
 
 waiting = True
 errno = 0
+
+op = optparse.OptionParser(usage="usage: %prog [-h] [-v] [-p|-r|-c jobid]")
+op.add_option("-v", "--verbose",
+              action="store_true", dest="verbose", default=False,
+              help="show incomming data")
+op.add_option("-p", "--pending",
+              action="store", type="string", default="",
+              help="wait until jobid is pending")
+op.add_option("-r", "--running",
+              action="store", type="string", default="",
+              help="wait until jobid is pending")
+op.add_option("-c", "--complete",
+              action="store", type="string", default="",
+              help="wait until jobid is pending")
+(opts, args) = op.parse_args()
+
+if opts.pending != "":
+  waitfor = " %s pending" % (opts.pending)
+if opts.running != "":
+  waitfor = " %s running" % (opts.running)
+if opts.complete != "":
+  waitfor = " %s complete" % (opts.complete)
 
 # Create a socket (SOCK_STREAM means a TCP socket)
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -25,7 +48,12 @@ while waiting:
     errno = 1
     waiting = False
   else:
-    print(format(received))
+    if verbose:
+      print(received)
+    # Check it match and exit
+    if waitfor in received:
+      print(received)
+      waiting = False
 
 sock.close()
 sys.exit(errno)
