@@ -5,20 +5,21 @@ import sys
 HOST, PORT = "localhost", 50007
 
 waiting = True
+waitfor = "*"
 errno = 0
 
 op = optparse.OptionParser(usage="usage: %prog [-h] [-v] [-p|-r|-c jobid]")
 op.add_option("-v", "--verbose",
-              action="store_true", dest="verbose", default=False,
-              help="show incomming data")
+              action="store_true", default=False,
+              help="don't show incomming data")
 op.add_option("-p", "--pending",
-              action="store", type="string", default="",
+              action="store", type="string", default="", metavar="jobid",
               help="wait until jobid is pending")
 op.add_option("-r", "--running",
-              action="store", type="string", default="",
+              action="store", type="string", default="", metavar="jobid",
               help="wait until jobid is pending")
 op.add_option("-c", "--complete",
-              action="store", type="string", default="",
+              action="store", type="string", default="", metavar="jobid",
               help="wait until jobid is pending")
 (opts, args) = op.parse_args()
 
@@ -48,7 +49,7 @@ while waiting:
     errno = 1
     waiting = False
   else:
-    if verbose:
+    if opts.verbose:
       print(received)
     # Check it match and exit
     if waitfor in received:
