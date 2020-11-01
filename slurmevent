@@ -1,8 +1,8 @@
+#!/usr/bin/python3
+
 import optparse
 import socket
 import sys
-
-HOST, PORT = "localhost", 50007
 
 waiting = True
 waitfor = "*"
@@ -21,6 +21,12 @@ op.add_option("-r", "--running",
 op.add_option("-c", "--complete",
               action="store", type="string", default="", metavar="jobid",
               help="wait until jobid is pending")
+op.add_option("-H", "--host",
+              action="store", type="string", default="localhost", metavar="hostname",
+              help="hostname to connect to (Default: localhost)")
+op.add_option("-P", "--port",
+              action="store", type="int", default=50007, metavar="port",
+              help="port to connect to (Default: 50007)")
 (opts, args) = op.parse_args()
 
 if opts.pending != "":
@@ -35,9 +41,9 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 try:
   # Connect to server
-  sock.connect((HOST, PORT))
-except:
-  print("Error")
+  sock.connect((opts.host, opts.port))
+except :
+  print("Error connecting.")
   sys.exit(1)
 
 #    sock.sendall(data + "\n")

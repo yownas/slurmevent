@@ -1,14 +1,12 @@
 #!/usr/bin/python3
 
+import optparse
 import re
 import sys
 import socket
 import select
 import subprocess
 
-
-HOST = 'localhost' 
-PORT = 50007
 
 SOCKET_LIST = []
 RECV_BUFFER = 4096 
@@ -22,13 +20,13 @@ def chat_server():
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_socket.bind((HOST, PORT))
+    server_socket.bind((opts.host, opts.port))
     server_socket.listen(256)
  
     # add server socket object to the list of readable connections
     SOCKET_LIST.append(server_socket)
  
-    print("slurmeventd started on port " + str(PORT))
+    print("slurmeventd started on port " + str(opts.port))
  
     while 1:
 
@@ -114,5 +112,17 @@ def broadcast (server_socket, message):
                     SOCKET_LIST.remove(socket)
  
 if __name__ == "__main__":
+
+    op = optparse.OptionParser(usage="usage: %prog [-h] [-v] [-p|-r|-c jobid]")
+    op.add_option("-v", "--verbose",
+                  action="store_true", default=False,
+                  help="don't show incomming data")
+    op.add_option("-H", "--host",
+                  action="store", type="string", default="localhost", metavar="hostname",
+                  help="hostname to bind to (Default: localhost)")
+    op.add_option("-P", "--port",
+                  action="store", type="int", default=50007, metavar="port",
+                  help="port to bind to (Default: 50007)")
+    (opts, args) = op.parse_args()
 
     sys.exit(chat_server())  
