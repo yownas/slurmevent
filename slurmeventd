@@ -70,19 +70,32 @@ def chat_server():
             log = logfile.stdout.readline().decode('utf-8')
             state = ""
 
+            # Job submitted
             m = re.match("\[(.*)\] _slurm_rpc_submit_batch_job: JobId=([0-9]*) .*", log)
             if m is not None:
                 time = m.groups()[0]
                 jobid = m.groups()[1]
                 state = "pending"
 
+            # Job starting
             m = re.match("\[(.*)\] prolog_running_decr: Configuration for JobId=([0-9]*) is complete", log)
             if m is not None:
                 time = m.groups()[0]
                 jobid = m.groups()[1]
                 state = "running"
+            m = re.match("\[(.*)\] prolog_running_decr: Configuration for JobId=([0-9_]*)\([0-9]\) is complete", log)
+            if m is not None:
+                time = m.groups()[0]
+                jobid = m.groups()[1]
+                state = "running"
 
+            # Job complete
             m = re.match("\[(.*)\] _job_complete: JobId=([0-9]*) done", log)
+            if m is not None:
+                time = m.groups()[0]
+                jobid = m.groups()[1]
+                state = "complete"
+            m = re.match("\[(.*)\] _job_complete: JobId=([0-9_]*)\([0-9]*\) done", log)
             if m is not None:
                 time = m.groups()[0]
                 jobid = m.groups()[1]
