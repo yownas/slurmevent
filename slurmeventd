@@ -55,6 +55,7 @@ def chat_server():
                     else:
                         # remove the socket that's broken    
                         if sock in SOCKET_LIST:
+                            print('Client ' + str(sock.getpeername()) + ' disconnected')
                             SOCKET_LIST.remove(sock)
 
                         ## at this stage, no data means probably the connection has been broken
@@ -100,6 +101,8 @@ def chat_server():
                 time = m.groups()[0]
                 jobid = m.groups()[1]
                 state = "complete"
+
+#[2020-11-06T21:02:06.005] _slurm_rpc_kill_job: REQUEST_KILL_JOB JobId=1234 uid 1234
 
             if state != "":
                 message = "[%s] %s %s" % (time, jobid, state)
