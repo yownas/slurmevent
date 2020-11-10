@@ -102,12 +102,10 @@ def chat_server():
                 jobid = m.groups()[1]
                 state = "complete"
 
-#[2020-11-06T21:02:06.005] _slurm_rpc_kill_job: REQUEST_KILL_JOB JobId=1234 uid 1234
-
             if state != "":
-                message = "[%s] %s %s" % (time, jobid, state)
+                message = "[%s] %s %s\n" % (time, jobid, state)
                 if opts.verbose:
-                    print("%s" % (message))
+                    print("%s" % (message.strip()))
                 broadcast(server_socket, message)
 
     server_socket.close()

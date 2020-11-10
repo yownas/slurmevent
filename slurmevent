@@ -60,13 +60,15 @@ while waiting:
     errno = 1
     waiting = False
   else:
-    if opts.verbose:
-      print(received)
-    # Check it match and exit
-    if waitfor in received:
-      if not opts.verbose:
+    for msg in received.strip().split('\n'):
+      if opts.verbose:
         print(received)
       waiting = False
+      # Check it match and exit
+      if waitfor in received:
+        if not opts.verbose:
+          print(received)
+        waiting = False
 
 sock.close()
 sys.exit(errno)
