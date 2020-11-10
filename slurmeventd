@@ -67,7 +67,7 @@ def chat_server():
                     continue
 
         # Check if there is new logdata
-        if tail.poll(0.1):
+        if tail.poll(1):
             log = logfile.stdout.readline().decode('utf-8')
             state = ""
 
