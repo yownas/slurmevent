@@ -63,7 +63,6 @@ while waiting:
     for msg in received.strip().split('\n'):
       if opts.verbose:
         print(received)
-      waiting = False
       # Check it match and exit
       if waitfor in received:
         if not opts.verbose:
